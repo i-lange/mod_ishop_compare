@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "mod_ishop_compare",
+  "version": "1.0.0",
+  "description": "mod_ishop_compare Assets",
+  "license": "GNU General Public License version 2 or later",
+  "assets": [
+    {
+      "name": "mod_ishop_compare.front",
+      "type": "style",
+      "uri": "mod_ishop_compare/front.css",
+      "version": "1.0.0"
+    },
+    {
+      "name": "mod_ishop_compare.front",
+      "type": "script",
+      "uri": "mod_ishop_compare/front.js",
+      "version": "1.0.0",
+      "dependencies": ["core"],
+      "attributes": {
+        "defer": true
+      }
+    }
+  ]
+}
