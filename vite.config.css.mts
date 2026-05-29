@@ -1,11 +1,3 @@
-/*
- * @package    tpl_itheme
- * @author     Pavel Lange <pavel@ilange.ru>
- * @link       https://github.com/i-lange/tpl_itheme
- * @copyright  (C) 2026 Pavel Lange <https://ilange.ru>
- * @license    GNU General Public License version 2 or later
- */
-
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
@@ -17,7 +9,6 @@ const __dirname = path.dirname(__filename)
 
 const SCSS_ENTRIES: string[] = [
   'front.scss',
-  //'functions.scss',
 ]
 
 function getScssEntries(): Record<string, string> {
