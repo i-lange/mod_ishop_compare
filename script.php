@@ -21,14 +21,14 @@ class Mod_Ishop_compareInstallerScript extends InstallerScript
      * @var string
      * @since 1.0.0
      */
-    protected $minimumPhp = '7.2';
+    protected $minimumPhp = '8.3';
 
     /**
      * Минимальная версия Joomla, необходимая для установки модуля
      * @var string
      * @since 1.0.0
      */
-    protected $minimumJoomla = '4.2.0';
+    protected $minimumJoomla = '6.0.0';
 
     /**
      * Список файлов, которые необходимо удалить
@@ -97,18 +97,27 @@ class Mod_Ishop_compareInstallerScript extends InstallerScript
             // Получаем данные из xml файла модуля
             $xml = $parent->getManifest();
 
+            // Экранируем значения manifest перед сборкой HTML-сообщения установщика
+            $extensionTitle = htmlspecialchars(Text::_('MOD_ISHOP_COMPARE'), ENT_QUOTES, 'UTF-8');
+            $extensionName = htmlspecialchars((string) $xml->name, ENT_QUOTES, 'UTF-8');
+            $extensionVersion = htmlspecialchars((string) $xml->version, ENT_QUOTES, 'UTF-8');
+            $extensionAuthor = htmlspecialchars((string) $xml->author, ENT_QUOTES, 'UTF-8');
+            $githubName = rawurlencode((string) $xml->name);
+            $donateUrl = htmlspecialchars(Text::_('MOD_ISHOP_COMPARE_DONATE_URL'), ENT_QUOTES, 'UTF-8');
+            $donateText = htmlspecialchars(Text::_('MOD_ISHOP_COMPARE_DONATE_BTN'), ENT_QUOTES, 'UTF-8');
+
             // Пишем сообщение со ссылками на сайт автора и на репозиторий
-            $message[] = '<p class="fs-2 mb-2">' . Text::_('MOD_ISHOP_COMPARE') . ' [' . $xml->name . ']</p>';
+            $message[] = '<p class="fs-2 mb-2">' . $extensionTitle . ' [' . $extensionName . ']</p>';
             $message[] = '<ul>';
-            $message[] = '<li>' . Text::_('MOD_ISHOP_COMPARE_VERSION') . ': ' . $xml->version . '</li>';
-            $message[] = '<li>' . Text::_('MOD_ISHOP_COMPARE_AUTHOR') . ': ' . $xml->author . '</li>';
-            $message[] = "<li><a href='https://ilange.ru' target='_blank'>https://ilange.ru</a></li>";
-            $message[] = "<li><a href='https://github.com/i-lange/" . $xml->name . "' target='_blank'>GitHub</a></li>";
+            $message[] = '<li>' . htmlspecialchars(Text::_('MOD_ISHOP_COMPARE_VERSION'), ENT_QUOTES, 'UTF-8') . ': ' . $extensionVersion . '</li>';
+            $message[] = '<li>' . htmlspecialchars(Text::_('MOD_ISHOP_COMPARE_AUTHOR'), ENT_QUOTES, 'UTF-8') . ': ' . $extensionAuthor . '</li>';
+            $message[] = '<li><a href="https://ilange.ru" target="_blank" rel="noopener noreferrer">https://ilange.ru</a></li>';
+            $message[] = '<li><a href="https://github.com/i-lange/' . $githubName . '" target="_blank" rel="noopener noreferrer">GitHub</a></li>';
             $message[] = '</ul>';
-            $message[] = '<p class="mb-2">' . Text::_('MOD_ISHOP_COMPARE_DONATE') . ': </p>';
-            $message[] = "<a href='" . Text::_('MOD_ISHOP_COMPARE_DONATE_URL')
-                . "' target='_blank' class='btn btn-primary'>" . Text::_('MOD_ISHOP_COMPARE_DONATE_BTN') . "</a>";
-            $msgStr = implode($message);
+            $message[] = '<p class="mb-2">' . htmlspecialchars(Text::_('MOD_ISHOP_COMPARE_DONATE'), ENT_QUOTES, 'UTF-8') . ': </p>';
+            $message[] = '<a href="' . $donateUrl
+                . '" target="_blank" rel="noopener noreferrer" class="btn btn-primary">' . $donateText . '</a>';
+            $msgStr = implode('', $message);
 
             // Показываем сообщение
             echo $msgStr;

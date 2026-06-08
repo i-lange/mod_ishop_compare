@@ -33,22 +33,38 @@ if ($params->get('use_js', 0)) {
 if ($params->get('use_css', 0)) {
     $wa->useStyle('mod_ishop_compare.front');
 }
+
+// Приводим счетчик к безопасному числу перед выводом в HTML.
+$safeCount = max(0, (int) $count);
+
+// Готовим стабильный идентификатор экземпляра для будущей JS-логики очистки.
+$moduleId = isset($module->id) ? (int) $module->id : 0;
+$compareId = 'mod-ishop-compare-' . $moduleId;
+
+// Экранируем маршрут и доступное имя перед выводом в атрибуты HTML.
+$compareUrl = htmlspecialchars(Route::_(RouteHelper::getCompareRoute()), ENT_QUOTES, 'UTF-8');
+$compareLabel = htmlspecialchars(Text::_('MOD_ISHOP_COMPARE_TEXT'), ENT_QUOTES, 'UTF-8');
 ?>
-<a href="<?php echo Route::_(RouteHelper::getCompareRoute()); ?>"
+<a href="<?php echo $compareUrl; ?>"
+   id="<?php echo $compareId; ?>"
    class="mod_ishop_compare"
-   data-ishop-compare>
+   data-ishop-compare
+   data-ishop-compare-id="<?php echo $moduleId; ?>"
+   aria-label="<?php echo $compareLabel; ?>">
     <div class="wrap">
         <?php if ($params->get('show_text', 0)) : ?>
             <span class="text"><?php echo Text::_('MOD_ISHOP_COMPARE_TEXT'); ?></span>
         <?php endif; ?>
         <?php if ($params->get('show_count', 0)) : ?>
-            <small class="count"><?php echo $count; ?></small>
+            <small class="count"><?php echo $safeCount; ?></small>
             <span><?php echo Text::_('MOD_ISHOP_COMPARE_COUNT'); ?></span>
         <?php endif; ?>
     </div>
 </a>
 <?php if ($params->get('show_btn_clear', 0)) : ?>
-    <button class="btn" type="button">
+    <button class="btn" type="button"
+            data-ishop-compare-clear
+            data-ishop-compare-target="#<?php echo $compareId; ?>">
         <?php echo Text::_('MOD_ISHOP_COMPARE_CLEAR'); ?>
     </button>
 <?php endif; ?>

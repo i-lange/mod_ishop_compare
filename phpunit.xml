@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="tests/php/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true">
+    <!-- Автономные тесты не запускают реальную Joomla CMS, com_ishop, базу данных и CMS Web Asset Manager. -->
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/php/Unit</directory>
+        </testsuite>
+        <testsuite name="layout">
+            <directory>tests/php/Layout</directory>
+        </testsuite>
+        <testsuite name="contract">
+            <directory>tests/php/Contract</directory>
+        </testsuite>
+    </testsuites>
+
+    <!-- Покрытие ограничено кодом расширения, а не тестовыми stubs и doubles. -->
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+            <directory suffix=".php">services</directory>
+            <directory suffix=".php">tmpl</directory>
+            <file>script.php</file>
+        </include>
+    </source>
+</phpunit>
