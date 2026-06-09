@@ -1,132 +1,107 @@
 # AGENTS.md
 
-## Назначение проекта
+## Контекст проекта
 
-`mod_ishop_compare` - устанавливаемое site-расширение, модуль для CMS Joomla 6. Модуль отображает текущее состояние списка сравнения товаров: ссылку на страницу сравнения, количество товаров в сравнении и, при включенном параметре, кнопку очистки.
+`mod_ishop_compare` - устанавливаемый site-модуль Joomla 6 для магазина на `com_ishop`. Он показывает ссылку на сравнение товаров, текущий счетчик и, если включен параметр, кнопку очистки списка.
 
-## Связанные проекты и расширения
-Данный модуль разрабатывается для интернет-магазина на Joomla.
-Собранный production-ready проект это magazin-gefest-new.local, он доступен:
-- в окружении Windows путь к директории проекта: "c:\OSPanel\home\magazin-gefest-new.local\"
-- в окружении WSL путь к директории проекта: "mnt/c/OSPanel/home/magazin-gefest-new.local"
-- на локальном сервере (сервер всегда запущен по-умолчанию) панель администратора доступна по адресу: https://magazin-gefest-new.local/administrator/
-- на локальном сервере (сервер всегда запущен по-умолчанию) фронтенд сайта доступен по адресу: https://magazin-gefest-new.local
+Рабочий сайт для ручной проверки: `C:\OSPanel\home\magazin-gefest-new.local`, фронтенд `https://magazin-gefest-new.local`, админка `https://magazin-gefest-new.local/administrator/`.
 
-Расширения, которые работают вместе в рамках magazin-gefest-new.local:
-- `com_ishop` (Windows: `c:\OSPanel\home\com_ishop\`) - основной компонент интернет-магазина. `mod_ishop_compare` напрямую зависит от него: в `src/Dispatcher/Dispatcher.php` модуль загружает компонент через `bootComponent('com_ishop')`, создает site-модель `Compare` и получает количество товаров через `getCount()`. В `tmpl/default.php` используется `Ilange\Component\Ishop\Site\Helper\RouteHelper::getCompareRoute()` для ссылки на страницу сравнения. При изменении модели сравнения, маршрутов, namespace или публичных helper API в `com_ishop` нужно синхронно проверять этот модуль.
-- `com_ishopintegro` (Windows: `c:\OSPanel\home\com_ishopintegro\`) - компонент интеграций интернет-магазина со сторонними сервисами и обменом данными. Может влиять на состав и свойства товаров, которые затем используются в `com_ishop` и отображаются в сравнении.
-- `mod_ishop_cart` (Windows: `c:\OSPanel\home\mod_ishop_cart\`) - модуль корзины. Обычно размещается рядом с модулем сравнения в интерфейсе сайта; при изменениях в общей навигации, иконках, счетчиках, AJAX-поведении и CSS-селекторов учитывайте визуальную и поведенческую согласованность этих модулей.
-- `mod_ishop_compare` (Windows: `c:\OSPanel\home\mod_ishop_compare\`) - текущий модуль состояния списка сравнения товаров.
-- `mod_ishop_filter` (Windows: `c:\OSPanel\home\mod_ishop_filter\`) - модуль фильтрации товаров в категории. Фильтр, карточки товаров и действия "сравнить" должны оставаться согласованными по параметрам товаров и пользовательскому состоянию.
-- `mod_ishop_zone` (Windows: `c:\OSPanel\home\mod_ishop_zone\`) - модуль выбора зоны доставки/местоположения. Зона может влиять на доступность, цены или свойства товаров в магазине, что важно для страниц каталога, карточки и сравнения.
-- `plg_ishopfinder` (Windows: `c:\OSPanel\home\plg_ishopfinder\`) - плагин индексации товаров в штатный поиск Joomla. Учитывайте его при изменении структуры данных товаров и ссылок.
-- `plg_ishopintegrocron` (Windows: `c:\OSPanel\home\plg_ishopintegrocron\`) - плагин запуска методов `com_ishopintegro` из планировщика задач Joomla.
-- `tpl_itheme` (Windows: `c:\OSPanel\home\tpl_itheme\`) - шаблон всей клиентской части сайта. Разметка и классы модуля должны быть совместимы с шаблоном, его Bootstrap 5.3-подходами, позициями модулей и общими стилями.
-- `plg_ithemecsscompiler` (Windows: `c:\OSPanel\home\plg_ithemecsscompiler\`) - плагин, который добавляет в `tpl_itheme` возможность компилировать стили из административной панели Joomla.
+Критичные соседние расширения:
+- `com_ishop` (`C:\OSPanel\home\com_ishop`) - основная зависимость. `src/Dispatcher/Dispatcher.php` вызывает `bootComponent('com_ishop')`, создает site-модель `Compare` и читает `getCount()`. `tmpl/default.php` использует `Ilange\Component\Ishop\Site\Helper\RouteHelper::getCompareRoute()`.
+- `tpl_itheme` (`C:\OSPanel\home\tpl_itheme`) - шаблон сайта, Bootstrap 5.3-подходы, позиции модулей и общие стили.
+- `mod_ishop_cart`, `mod_ishop_filter`, `mod_ishop_zone` - соседние пользовательские модули; держите согласованными навигацию, счетчики, AJAX, CSS hooks и пользовательское состояние.
+- `com_ishopintegro`, `plg_ishopfinder`, `plg_ishopintegrocron`, `plg_ithemecsscompiler` - связанные интеграции, поиск, cron и компиляция стилей.
 
-При внесении изменений в проект нужно держать во внимании этот контекст. Все расширения дополняют друг друга, а `mod_ishop_compare` особенно чувствителен к изменениям в `com_ishop`, `tpl_itheme` и соседних пользовательских модулях (`mod_ishop_cart`, `mod_ishop_filter`, `mod_ishop_zone`).
+## Документация
 
-## Официальный контекст Joomla 6
+Для вопросов по библиотекам, фреймворкам, SDK, API, CLI и облачным сервисам используйте Context7 MCP: сначала `resolve-library-id`, затем `query-docs`. Для Joomla 6 дополнительно сверяйтесь с официальной документацией:
+- https://manual.joomla.org/docs/get-started/
+- https://manual.joomla.org/docs/get-started/technical-requirements/
+- https://manual.joomla.org/docs/building-extensions/modules/module-development-tutorial/
+- https://manual.joomla.org/docs/general-concepts/web-asset-manager/
 
-При изменениях сверяйтесь с официальной документацией Joomla, особенно:
+## Стек
 
-- Getting Started: https://manual.joomla.org/docs/get-started/
-- Technical Requirements: https://manual.joomla.org/docs/get-started/technical-requirements/
-- Module Development Tutorial: https://manual.joomla.org/docs/building-extensions/modules/module-development-tutorial/
-- Web Asset Manager: https://manual.joomla.org/docs/general-concepts/web-asset-manager/
-
-
-## Стек и окружение
-
-- Joomla CMS 6.x, `method="upgrade"`.
-- PHP 8.3+; для Joomla 6.x ориентируйтесь на актуальные требования официальной документации.
-- Для вывода html по-умолчанию используются подходы Bootstrap 5.3.
-- Node.js 24+, pnpm 10+.
-- PHP-тесты запускаются через PHPUnit 11 из Composer dev-зависимостей.
-- JS-тесты запускаются через Vitest 4 в DOM-среде `happy-dom`.
-- Для Composer/PHPUnit на Windows используйте PHP 8.3 из OSPanel: `C:\OSPanel\modules\PHP-8.3\PHP\php.exe`. Глобальный `php` в PATH может не иметь нужных расширений, например `mbstring`.
-
-## Автономные тесты
-
-Автоматические тесты не поднимают реальную Joomla CMS и не требуют доступного сайта `https://magazin-gefest-new.local`. В тестах не запускаются `com_installer`, настоящий Joomla application context, база данных, CMS Web Asset Manager и реальный `com_ishop`; для них используются stubs и test doubles.
-
-Уровни тестов:
-- `unit` - `src/Dispatcher/Dispatcher.php`, `services/provider.php`, `script.php`.
-- `layout` - `tmpl/default.php` через автономный renderer.
-- `contract` - `mod_ishop_compare.xml`, `media/joomla.asset.json`, language-файлы, `_JEXEC` guards, syntax и namespace.
-- `build` - реальные CSS/JS artifacts после сборки.
-- `packaging` - installable zip через чтение central directory без распаковки.
-
-Ключевые файлы тестовой инфраструктуры:
-- `phpunit.xml` - suites `unit`, `layout`, `contract`, bootstrap и source coverage.
-- `tests/php/bootstrap.php` - определяет `_JEXEC`, подключает Composer autoload, Joomla/com_ishop stubs и test doubles.
-- `tests/php/stubs/JoomlaStubs.php` - минимальные stubs Joomla API и `RouteHelper`.
-- `tests/php/Support/TestDoubles.php` - doubles приложения, документа, Web Asset Manager, компонента, модели и layout renderer.
-- `vitest.config.mts` - `happy-dom`, `tests/js/**/*.test.js`, coverage для `media/js/front.js`.
-- `tests/tools/run-phpunit.mjs` - выбирает `PHP_BIN`, `C:\OSPanel\modules\PHP-8.3\PHP\php.exe` или `php`; для coverage выставляет `XDEBUG_MODE=coverage`.
-- `tests/tools/check-php-coverage.mjs` - проверяет Clover coverage gate.
+- Joomla CMS 6.x, extension manifest `method="upgrade"`.
+- PHP 8.3+; на Windows для Composer/PHPUnit используйте `C:\OSPanel\modules\PHP-8.3\PHP\php.exe`, потому что глобальный `php` может быть без нужных расширений.
+- Node.js `>=24.0.0`, npm `>=11.8.0`, pnpm `>=10.3.0`.
+- Vite 8, Vitest 4 в `happy-dom`, PHPUnit 11.5 из Composer dev-зависимостей.
+- HTML по умолчанию ориентирован на Bootstrap 5.3.
 
 ## Команды
 
-- `pnpm install` - установить JS-зависимости по `pnpm-lock.yaml`.
-- `C:\OSPanel\modules\PHP-8.3\PHP\php.exe C:\OSPanel\data\PHP-8.3\default\composer\composer.phar install` - установить PHP dev-зависимости по `composer.lock`.
-- `pnpm build` - полная сборка CSS и JS через `build.mjs`.
-- `pnpm build:css` - собрать `media/css/*.css`, `*.min.css`, `*.min.css.gz`.
-- `pnpm build:js` - собрать `media/js/*.min.js`, `*.min.js.gz`.
-- `pnpm watch:js` - наблюдать `media/js/*.min.js`, `*.min.js.gz`.
-- `pnpm watch:css` - наблюдать `media/css/*.css`, `*.min.css`, `*.min.css.gz`.
-- `pnpm test:php` - запустить PHPUnit suites `unit`, `layout`, `contract` через `tests/tools/run-phpunit.mjs`.
-- `pnpm test:js` - запустить Vitest smoke/DOM-тесты `tests/js/front.test.js`.
-- `pnpm test:build` - выполнить `pnpm build` и проверить generated CSS/JS artifacts.
-- `pnpm test:zip` - выполнить `pnpm zip` и проверить installable archive.
-- `pnpm test` - последовательно запустить PHP, JS, build и zip-проверки.
-- `pnpm test:php:coverage` - PHPUnit с Clover output `build/coverage/php-clover.xml` и PHP coverage gate.
-- `pnpm test:js:coverage` - Vitest coverage для `media/js/front.js`.
-- `pnpm test:coverage` - PHP и JS coverage.
-- `pnpm zip` - `pnpm build` и создание установочного архива `mod_ishop_compare-{version}.zip`.
+```powershell
+pnpm install
+C:\OSPanel\modules\PHP-8.3\PHP\php.exe C:\OSPanel\data\PHP-8.3\default\composer\composer.phar install
 
-## Правила внесения изменений
+pnpm build          # CSS + JS через build.mjs
+pnpm build:css      # media/css/*.css, *.min.css, *.min.css.gz
+pnpm build:js       # media/js/*.min.js, *.min.js.gz
+pnpm watch:css
+pnpm watch:js
 
-- Сначала меняйте исходники: SCSS в `media/scss`, обычные JS entrypoints в `media/js`, PHP-код в `src`, `services`, `tmpl`, `script.php` и манифесте `mod_ishop_compare.xml`. Не правьте вручную `.min.css`, `.min.js`, `.gz`, если изменение должно генерироваться сборкой.
-- После изменения SCSS/JS запускайте соответствующую сборку и включайте сгенерированные assets, если проект ожидает готовый installable module.
-- `vite.config.css.mts` использует `emptyOutDir: true` для `media/css`; не держите там ручные файлы, которые не должны удаляться сборкой.
-- В PHP-файлах сохраняйте `defined('_JEXEC') or die;`, namespaced Joomla API (`Factory`, `HTMLHelper`, `Text`, `LayoutHelper`, `Route`) и существующий стиль модуля.
-- Экранируйте вывод: `$this->escape()`, `htmlspecialchars()`, `HTMLHelper::cleanImageURL()`, `Text::_()` и явные приведения типов там, где данные приходят из params/input/model.
-- Формы должны содержать Joomla CSRF token через `HTMLHelper::_('form.token')`; новые POST/AJAX сценарии должны учитывать Joomla token и права доступа.
-- Новые assets регистрируйте в `joomla.asset.json` с понятными именами, `type`, `uri`, `attributes` и `dependencies`.
-- Если добавляете новый JS entrypoint, обновите `JS_ENTRY_FILES` в `vite.config.js.mts` и asset declaration в `joomla.asset.json`.
-- Если добавляете новый SCSS entrypoint, обновите `SCSS_ENTRIES` в `vite.config.css.mts` и asset declaration в `joomla.asset.json`.
-- Текущий JS entrypoint `media/js/front.js` экспортирует `FRONT_ENTRY_MARKER`, `initIshopCompare(root = document, JoomlaApi = window.Joomla)` и публикует API в `globalThis.IshopCompare`. Импорт entrypoint не должен сам отправлять сетевые запросы или менять DOM.
-- AJAX-контракт очистки списка сравнения сейчас зафиксирован тестами как `?option=com_ajax&module=ishop_compare&method=clear&format=json`, `POST`, JSON payload, headers `Cache-Control` и `Content-Type`. При изменении backend-контракта сначала обновляйте тесты и layout hooks осознанно.
-- Layout должен сохранять стабильные hooks `data-ishop-compare`, `data-ishop-compare-id`, `data-ishop-compare-clear`, `data-ishop-compare-target`; они используются JS-тестами и будущей интерактивной логикой.
-- При изменении версии расширения обновляйте ее синхронно в трех местах: `package.json`, `<version>` в `mod_ishop_compare.xml` и `version` в `media/joomla.asset.json` (включая версии конкретных asset-записей). Это нужно, чтобы имя архива `mod_ishop_compare-{version}.zip`, манифест Joomla и asset-декларации не расходились.
-- Если изменение затрагивает зависимость от `com_ishop`, проверяйте совместимость с `Compare` site-моделью, `RouteHelper::getCompareRoute()` и пользовательским состоянием списка сравнения.
-- Для Bootstrap-разметки используйте классы и data-атрибуты Bootstrap 5.3 (`data-bs-*`), а не устаревшие Bootstrap 4 подходы.
-- Поддерживайте accessibility: `aria-label`, `visually-hidden`, корректные `button`/`a`, возврат фокуса в offcanvas/modal и видимые состояния focus.
-- При добавлении языковых ключей обновляйте обе локали `en-GB` и `ru-RU`.
-- Весь добавляемый код сопровождайте комментариями на русском языке там, где комментарий нужен для понимания контракта, stubs, тестовой логики или неочевидного поведения. Не добавляйте пустые комментарии к самоочевидным строкам.
-- Не редактируйте `node_modules`.
-- Не редактируйте `vendor`.
+pnpm test:php       # PHPUnit unit/layout/contract
+pnpm test:js        # Vitest tests/js/front.test.js
+pnpm test:build     # build + build-config tests
+pnpm test:zip       # zip + packaging tests
+pnpm test           # php + js + build + zip
+pnpm test:coverage  # PHP Clover + JS coverage
+pnpm zip            # build + mod_ishop_compare-{version}.zip
+```
+
+## Тесты
+
+Тесты автономны: не поднимают Joomla CMS, `magazin-gefest-new.local`, базу данных, настоящий Web Asset Manager или реальный `com_ishop`; используются stubs/test doubles.
+
+Уровни:
+- `unit` - `src/Dispatcher/Dispatcher.php`, `services/provider.php`, `script.php`.
+- `layout` - `tmpl/default.php` через автономный renderer.
+- `contract` - manifest, asset manifest, language-файлы, `_JEXEC` guards, syntax, namespace.
+- `build` - реальные CSS/JS artifacts после сборки.
+- `packaging` - installable zip через чтение central directory без распаковки.
+
+Ключевые файлы: `phpunit.xml`, `vitest.config.mts`, `tests/php/bootstrap.php`, `tests/php/stubs/JoomlaStubs.php`, `tests/php/Support/TestDoubles.php`, `tests/tools/run-phpunit.mjs`, `tests/tools/check-php-coverage.mjs`.
+
+## Правила изменений
+
+- Сначала меняйте исходники: PHP в `src`, `services`, `tmpl`, `script.php`; SCSS в `media/scss`; ручной JS entrypoint в `media/js/front.js`; манифест в `mod_ishop_compare.xml`.
+- Не правьте вручную generated assets: `media/css/*.css`, `*.min.css`, `*.gz`, `media/js/*.min.js`, `*.gz`, если изменение должно идти через сборку. После изменений SCSS/JS запускайте соответствующий build и включайте generated artifacts.
+- `vite.config.css.mts` очищает `media/css` (`emptyOutDir: true`); не храните там ручные файлы. JS entrypoints перечислены в `JS_ENTRY_FILES`, SCSS entrypoints - в `SCSS_ENTRIES`.
+- Новые assets регистрируйте в `media/joomla.asset.json` с корректными `type`, `uri`, `dependencies`, `attributes` и версиями.
+- Версию расширения меняйте синхронно в `package.json`, `<version>` в `mod_ishop_compare.xml`, `media/joomla.asset.json` и версиях asset-записей.
+- В PHP сохраняйте `defined('_JEXEC') or die;`, namespaced Joomla API и текущий стиль модуля.
+- Экранируйте вывод через `$this->escape()`, `htmlspecialchars()`, `HTMLHelper::cleanImageURL()`, `Text::_()` и явные приведения типов для данных из params/input/model.
+- Формы/POST/AJAX должны учитывать Joomla CSRF token через `HTMLHelper::_('form.token')` или актуальный JS token и права доступа.
+- Bootstrap-разметка должна использовать Bootstrap 5.3 и `data-bs-*`, не Bootstrap 4.
+- Поддерживайте accessibility: корректные `button`/`a`, `aria-label`, `visually-hidden`, видимые focus states, возврат фокуса в offcanvas/modal.
+- Новые языковые ключи добавляйте в обе локали: `language/en-GB` и `language/ru-RU`.
+- Комментарии добавляйте на русском только для неочевидных контрактов, stubs, тестовой логики или поведения.
+- Не редактируйте `node_modules` и `vendor`.
+
+## Стабильные контракты
+
+- `media/js/front.js` экспортирует `FRONT_ENTRY_MARKER`, `initIshopCompare(root = document, JoomlaApi = window.Joomla)` и публикует API в `globalThis.IshopCompare`. Импорт entrypoint не должен сам отправлять сетевые запросы или менять DOM.
+- AJAX очистки сравнения зафиксирован тестами: `POST ?option=com_ajax&module=ishop_compare&method=clear&format=json`, JSON payload, headers `Cache-Control` и `Content-Type`.
+- Layout hooks должны сохраняться: `data-ishop-compare`, `data-ishop-compare-id`, `data-ishop-compare-clear`, `data-ishop-compare-target`.
+- При изменениях зависимости от `com_ishop` проверяйте совместимость с site-моделью `Compare`, `RouteHelper::getCompareRoute()` и пользовательским состоянием сравнения.
 
 ## Проверка перед сдачей
 
-Минимальный набор:
+Минимально для кода:
 
-- `pnpm test`
-- `pnpm test:coverage`
-- `pnpm build`
-- `pnpm zip`
+```powershell
+pnpm test
+pnpm test:coverage
+pnpm build
+pnpm zip
+```
 
-Если менялись только документы, достаточно проверить, что инструкции не противоречат `package.json`, `composer.json`, `phpunit.xml`, `vitest.config.mts` и README.
+Если менялись только документы, достаточно сверить инструкции с `package.json`, `composer.json`, `phpunit.xml`, `vitest.config.mts` и `README.md`.
 
-Для clean-checkout проверки используйте сценарий: установить pnpm-зависимости, установить Composer-зависимости через OSPanel PHP 8.3, затем выполнить `pnpm test`. Эта проверка не должна требовать `magazin-gefest-new.local`, базы Joomla и реального `com_ishop`.
+Clean-checkout проверка: установить pnpm-зависимости, установить Composer dev-зависимости через OSPanel PHP 8.3, затем выполнить `pnpm test`. Она не должна требовать сайта, БД, Joomla CMS или реального `com_ishop`.
 
-Если Node.js, pnpm, PHP 8.3 или Composer из OSPanel недоступны, явно сообщите, какие команды не запускались из-за окружения.
+Если Node.js, pnpm, PHP 8.3 или Composer из OSPanel недоступны, явно укажите, какие команды не запускались. Установленный zip на `magazin-gefest-new.local` проверяется вручную перед релизом: главная, категория, карточка товара, корзина, checkout, поиск, логин, 403/404 и offline page.
 
-Функциональная проверка установленного zip на сайте остается ручной релизной проверкой. Для нее установите zip в Joomla 6 по адресу https://magazin-gefest-new.local/administrator/index.php?option=com_installer&view=install и проверьте как минимум главную, категорию, карточку товара, корзину, checkout, поиск, логин, 403/404 и offline page.
+## Ограничения
 
-## Ограничения и известные состояния
-
-- Это не полный сайт Joomla, а только модуль, устанавливаемый как расширение. Корневые PHP-файлы нельзя полноценно запускать вне Joomla application context.
-- Автоматические тесты автономны и намеренно не проверяют реальную установку расширения в Joomla, настоящую базу данных, настоящий Web Asset Manager CMS и реальный `com_ishop`.
-- `PLAN.md` содержит закрытый план покрытия тестами; при расширении тестовой стратегии добавляйте новый план или новый раздел, а не снимайте существующие отметки без причины.
+Это не полный сайт Joomla, а устанавливаемый модуль. Корневые PHP-файлы нельзя полноценно запускать вне Joomla application context. Автотесты намеренно не проверяют реальную установку расширения, настоящую БД, CMS Web Asset Manager и реальный `com_ishop`.
