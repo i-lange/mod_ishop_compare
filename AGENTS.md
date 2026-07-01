@@ -46,7 +46,7 @@ pnpm test:build     # build + build-config tests
 pnpm test:zip       # zip + packaging tests
 pnpm test           # php + js + build + zip
 pnpm test:coverage  # PHP Clover + JS coverage
-pnpm zip            # build + mod_ishop_compare-{version}.zip
+pnpm zip            # build + build/mod_ishop_compare-{version}.zip
 ```
 
 ## Тесты

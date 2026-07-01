@@ -31,7 +31,7 @@ pnpm build
 pnpm zip
 ```
 
-Обычная команда `pnpm test` последовательно запускает PHP, JS, build и zip-проверки. Coverage строится отдельно: PHP Clover пишется в `build/coverage/php-clover.xml`, JS coverage - в `coverage/js`.
+Обычная команда `pnpm test` последовательно запускает PHP, JS, build и zip-проверки. Архив установки создается в `build/mod_ishop_compare-{version}.zip`. Coverage строится отдельно: PHP Clover пишется в `build/coverage/php-clover.xml`, JS coverage - в `coverage/js`.
 
 Source-политика assets:
 - исходник CSS - `media/scss/front.scss`;
