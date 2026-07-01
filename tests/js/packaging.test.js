@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import pkg from '../../package.json' with { type: 'json' }
 
 const openZip = promisify(yauzl.open)
-const zipFile = `mod_ishop_compare-${pkg.version}.zip`
+const zipFile = `build/mod_ishop_compare-${pkg.version}.zip`
 
 /**
  * Читает central directory zip без распаковки архива на диск.
@@ -33,7 +33,7 @@ function hasEntryInside(entries, directory) {
 }
 
 describe('installable zip package', () => {
-  it('создает архив с именем из package.version', async () => {
+  it('создает архив в build с именем из package.version', async () => {
     const entries = await readZipEntries(zipFile)
 
     expect(entries.length).toBeGreaterThan(0)

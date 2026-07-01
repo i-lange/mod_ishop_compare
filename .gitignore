@@ -6,7 +6,7 @@
 /vendor
 /.phpunit.cache
 /coverage
-/build/coverage
+/build
 /*.zip
 opencode.json
 pnpm-lock.yaml

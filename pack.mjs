@@ -7,11 +7,17 @@
  */
 
 import fs from 'node:fs';
+import path from 'node:path';
 import archiver from 'archiver';
 import pkg from './package.json' with { type: 'json' };
 
+const outputDir = 'build';
 const filename = `mod_ishop_compare-${pkg.version}.zip`;
-const output = fs.createWriteStream(filename);
+const outputPath = path.join(outputDir, filename);
+
+fs.mkdirSync(outputDir, { recursive: true });
+
+const output = fs.createWriteStream(outputPath);
 const archive = archiver('zip', { zlib: { level: 9 } });
 
 archive.pipe(output);
@@ -30,4 +36,4 @@ for (const file of [
 
 await archive.finalize();
 
-console.log('\n✅ Создан архив для установки! Файл: ' + filename);
+console.log('\n✅ Создан архив для установки! Файл: ' + outputPath);
